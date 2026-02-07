@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Rose Day!</title>
+    <style>
+        /* --- General Settings --- */
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nunito:wght@300;600&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(120deg, #fbc2eb 0%, #a6c1ee 100%);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Nunito', sans-serif;
+            touch-action: manipulation;
+        }
+
+        .container {
+            position: relative;
+            text-align: center;
+            z-index: 10;
+            width: 100%;
+            max-width: 414px;
+            padding: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* --- 3D FLIP CARD STYLES --- */
+        
+        .scene {
+            width: 100%;
+            max-width: 350px; 
+            height: 240px;    
+            perspective: 600px;
+            margin-bottom: 3rem; 
+            z-index: 20;
+            animation: slideDown 1.5s ease-out;
+        }
+
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden; 
+            -webkit-backface-visibility: hidden;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* Padding to keep text away from edges */
+            padding: 2rem 1.5rem; 
+            box-sizing: border-box;
+        }
+
+        .card-face-front {
+            z-index: 2;
+        }
+
+        .card-face-back {
+            transform: rotateY(180deg);
+            background: #fff0f3; 
+        }
+
+        h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: 3rem;
+            color: #d6334a;
+            margin: 0;
+            margin-top: 10px;
+            line-height: 1.2;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        p {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        /* --- TEXT ANIMATIONS --- */
+
+        /* 1. Click Me Guide (Front) */
+        .click-guide {
+            margin-top: 10px;
+            margin-bottom: 10px;
+            font-size: 0.65rem;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0; /* Hidden initially */
+            /* Wait 1.5s, then fade in and pulse forever */
+            animation: fadeInPulse 2s infinite 5s; 
+        }
+
+        @keyframes fadeInPulse {
+            0% { opacity: 0; transform: scale(0.95); }
+            10% { opacity: 0.5; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+            100% { opacity: 0.5; transform: scale(1); }
+        }
+
+        /* 2. Hover Guide (Back) */
+        .hover-guide {
+            margin-top: 15px;
+            font-size: 0.8rem;
+            color: #d6334a;
+            font-weight: bold;
+            opacity: 0; /* Hidden by default */
+            transform: translateY(10px);
+            /* Transition Logic: 
+               When opacity changes, take 1s to do it.
+               But wait 2s before starting (delay). 
+            */
+            transition: opacity 1s ease 2s, transform 1s ease 2s;
+        }
+
+        /* Only when the card is flipped, fade this text in */
+        .card.is-flipped .hover-guide {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+
+        /* --- The Bouquet Area --- */
+        .bouquet {
+            position: relative;
+            width: 100%;
+            height: 350px;
+            margin-top: -40px; 
+        }
+
+        .flower-wrapper {
+            position: absolute;
+            bottom: 0;
+            transform-origin: bottom center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            width: 120px; 
+            height: 300px;
+            pointer-events: auto;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .flower-wrapper:nth-child(1) { left: 50%; transform: translateX(-50%); z-index: 3; animation: grow-up-center 2s ease-out forwards; }
+        .flower-wrapper:nth-child(2) { left: 15%; transform: translateX(-50%) rotate(-10deg); z-index: 2; animation: grow-up-left 2s ease-out 0.5s forwards; opacity: 0; }
+        .flower-wrapper:nth-child(3) { left: 85%; transform: translateX(-50%) rotate(10deg); z-index: 2; animation: grow-up-right 2s ease-out 0.8s forwards; opacity: 0; }
+
+        .artistic-rose {
+            width: 110px; height: 110px;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.2));
+            transform-origin: center bottom;
+            animation: pop-open 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation-delay: inherit; 
+            transform: scale(0);
+            position: relative; z-index: 2; pointer-events: none;
+        }
+
+        .stem { width: 8px; background: linear-gradient(to right, #4a7c59, #6b9c7b); border-radius: 4px; flex-grow: 1; position: relative; margin-top: -15px; z-index: -1; }
+
+        .leaf {
+            position: absolute; width: 35px; height: 18px; background: #4a7c59;
+            border-radius: 2px 20px 2px 20px; opacity: 0;
+            animation: leaf-appear 0.5s ease-out forwards;
+        }
+        .leaf.left { left: -35px; top: 40%; transform: rotate(-15deg); animation-delay: 1.2s;}
+        .leaf.right { right: -35px; top: 55%; transform: rotate(-175deg); animation-delay: 1.5s;}
+
+        /* --- BUTTERFLY CSS --- */
+        .butterfly-cluster {
+            position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
+            width: 140px; height: 140px; z-index: 10; pointer-events: none; 
+            opacity: 0; transition: opacity 0.4s ease-out;
+        }
+        .flower-wrapper.active .butterfly-cluster { opacity: 1; }
+        @media (hover: hover) { .flower-wrapper:hover .butterfly-cluster { opacity: 1; } }
+
+        .bfly { position: absolute; background-size: contain; background-repeat: no-repeat; }
+
+        .bfly-gold {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffd700'%3E%3Cpath d='M12 2C12 2 11 3 11 5C11 7 12 12 12 12C12 12 13 7 13 5C13 3 12 2 12 2ZM8 6C6 5 2 6 2 9C2 12 5 13 6 13C5 13 3 14 3 16C3 18 6 18 8 16C10 14 11 13 11 13C11 13 10 10 8 6ZM16 6C18 5 22 6 22 9C22 12 19 13 18 13C19 13 21 14 21 16C21 18 18 18 16 16C14 14 13 13 13 13C13 13 14 10 16 6Z'/%3E%3C/svg%3E");
+            filter: drop-shadow(0 2px 4px rgba(218, 165, 32, 0.5));
+        }
+        .bfly-white {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3E%3Cpath d='M12 2C12 2 11 3 11 5C11 7 12 12 12 12C12 12 13 7 13 5C13 3 12 2 12 2ZM8 6C6 5 2 6 2 9C2 12 5 13 6 13C5 13 3 14 3 16C3 18 6 18 8 16C10 14 11 13 11 13C11 13 10 10 8 6ZM16 6C18 5 22 6 22 9C22 12 19 13 18 13C19 13 21 14 21 16C21 18 18 18 16 16C14 14 13 13 13 13C13 13 14 10 16 6Z'/%3E%3C/svg%3E");
+            filter: drop-shadow(0 1px 3px rgba(255, 255, 255, 0.7));
+        }
+        .bfly-blue {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300bfff'%3E%3Cpath d='M12 2C12 2 11 3 11 5C11 7 12 12 12 12C12 12 13 7 13 5C13 3 12 2 12 2ZM8 6C6 5 2 6 2 9C2 12 5 13 6 13C5 13 3 14 3 16C3 18 6 18 8 16C10 14 11 13 11 13C11 13 10 10 8 6ZM16 6C18 5 22 6 22 9C22 12 19 13 18 13C19 13 21 14 21 16C21 18 18 18 16 16C14 14 13 13 13 13C13 13 14 10 16 6Z'/%3E%3C/svg%3E");
+            filter: drop-shadow(0 0 5px rgba(0, 191, 255, 0.6));
+        }
+
+        .bfly:nth-child(1) { width: 40px; height: 40px; top: 30%; left: 0%; animation: wing-flap 0.2s infinite alternate, float-1 2.5s ease-in-out infinite; }
+        .bfly:nth-child(2) { width: 30px; height: 30px; top: 0%; right: 5%; animation: wing-flap 0.25s infinite alternate, float-2 3s ease-in-out infinite; }
+        .bfly:nth-child(3) { width: 24px; height: 24px; bottom: 20%; left: 60%; animation: wing-flap 0.15s infinite alternate, float-3 2s ease-in-out infinite; }
+
+        @keyframes wing-flap { 0% { transform: scaleX(1); } 100% { transform: scaleX(0.4); } }
+        @keyframes float-1 { 0%, 100% { margin-top: 0; margin-left: 0; } 50% { margin-top: -15px; margin-left: 10px; } }
+        @keyframes float-2 { 0%, 100% { margin-top: 0; margin-right: 0; } 50% { margin-top: 10px; margin-right: 15px; } }
+        @keyframes float-3 { 0%, 100% { transform: scale(1) translateY(0); } 50% { transform: scale(1.1) translateY(-10px); } }
+
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes grow-up-center { 0% { height: 0; opacity: 1; } 100% { height: 260px; opacity: 1; } }
+        @keyframes grow-up-left { 0% { height: 0; opacity: 0; } 100% { height: 220px; opacity: 1; } }
+        @keyframes grow-up-right { 0% { height: 0; opacity: 0; } 100% { height: 220px; opacity: 1; } }
+        @keyframes pop-open { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes leaf-appear { 0% { opacity: 0; transform: scale(0); } 100% { opacity: 1; transform: scale(1) rotate(var(--r, 0deg)); } }
+        @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+        .petal-rain {
+            position: absolute; top: -50px; background: #c41e3a; width: 12px; height: 12px;
+            border-radius: 2px 50% 2px 50%; opacity: 0.8; animation: fall linear forwards;
+            pointer-events: none; z-index: 5;
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop>
+        <source src="/backgroundMusic/BackgroundMusic.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        
+        <div class="scene">
+            <div class="card" id="card" onclick="playMusic()">
+                <div class="card-face card-face-front">
+                    <h1>Happy Rose Day!</h1>
+                    <p>To the most beautiful flower in my life, Atru.</p>
+                    <div class="click-guide">(click me)</div>
+                </div>
+                <div class="card-face card-face-back">
+                    <h1 style="color: #e03e52;">I Love You!</h1>
+                    <div style="font-size: 3rem; margin-top: 10px;">❤️</div>
+                    <div class="hover-guide">Hover the rose for butterflies 🦋</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bouquet">
+            
+            <div class="flower-wrapper" onclick="toggleButterflies(this); playMusic();" onmouseenter="randomizeWrapper(this)">
+                <div class="butterfly-cluster">
+                    <div class="bfly"></div>
+                    <div class="bfly"></div>
+                    <div class="bfly"></div>
+                </div>
+                <img src="/images/RoseImage.png" alt="Rose" class="artistic-rose">
+                <div class="stem">
+                    <div class="leaf left" style="--r: -15deg"></div>
+                    <div class="leaf right" style="--r: 190deg"></div>
+                </div>
+            </div>
+
+            <div class="flower-wrapper" onclick="toggleButterflies(this); playMusic();" onmouseenter="randomizeWrapper(this)">
+                <div class="butterfly-cluster">
+                    <div class="bfly"></div>
+                    <div class="bfly"></div>
+                </div>
+                <img src="/images/RoseImage.png" alt="Rose" class="artistic-rose">
+                <div class="stem">
+                    <div class="leaf left" style="--r: -20deg"></div>
+                </div>
+            </div>
+
+            <div class="flower-wrapper" onclick="toggleButterflies(this); playMusic();" onmouseenter="randomizeWrapper(this)">
+                <div class="butterfly-cluster">
+                    <div class="bfly"></div>
+                    <div class="bfly"></div>
+                </div>
+                <img src="/images/RoseImage.png" alt="Rose" class="artistic-rose">
+                <div class="stem">
+                    <div class="leaf right" style="--r: 195deg"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- Falling Petals Logic ---
+        function createPetal() {
+            const petal = document.createElement('div');
+            petal.classList.add('petal-rain');
+            petal.style.left = Math.random() * 100 + 'vw';
+            petal.style.animationDuration = Math.random() * 2 + 3 + 's';
+            const size = Math.random() * 8 + 8;
+            petal.style.width = size + 'px';
+            petal.style.height = size + 'px';
+            const colors = ['#8a1c2a', '#c41e3a', '#e03e52', '#ff5e62', '#ff9a9e'];
+            petal.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            document.body.appendChild(petal);
+            setTimeout(() => { petal.remove(); }, 5000);
+        }
+        setInterval(createPetal, 400);
+
+        // --- Card Flip Logic ---
+        const card = document.getElementById('card');
+        card.addEventListener('click', () => {
+            card.classList.toggle('is-flipped');
+        });
+
+        // --- Randomization Logic ---
+        const butterflyColors = ['bfly-gold', 'bfly-white', 'bfly-blue'];
+
+        function randomizeWrapper(wrapperElement) {
+            const butterflies = wrapperElement.querySelectorAll('.bfly');
+            butterflies.forEach(bfly => {
+                bfly.classList.remove(...butterflyColors);
+                const randomColor = butterflyColors[Math.floor(Math.random() * butterflyColors.length)];
+                bfly.classList.add(randomColor);
+            });
+        }
+
+        // --- Butterfly Toggle Logic ---
+        function toggleButterflies(element) {
+            if (!element.classList.contains('active')) {
+                randomizeWrapper(element);
+            }
+            element.classList.toggle('active');
+        }
+
+        document.querySelectorAll('.flower-wrapper').forEach(wrapper => {
+            randomizeWrapper(wrapper);
+        });
+
+        // --- AUDIO LOGIC ---
+        let musicStarted = false;
+
+        function playMusic() {
+            if (musicStarted) return; 
+            
+            const audio = document.getElementById('bgMusic');
+            audio.play().then(() => {
+                musicStarted = true;
+                // Remove the global listeners once music starts
+                document.removeEventListener('click', playMusic);
+                document.removeEventListener('touchstart', playMusic);
+            }).catch(e => {
+                console.log("Audio play failed (interaction needed): ", e);
+            });
+        }
+
+        // Global listeners to catch ANY first click
+        document.addEventListener('click', playMusic);
+        document.addEventListener('touchstart', playMusic);
+        window.addEventListener('load', playMusic);
+
+    </script>
+</body>
+</html>
